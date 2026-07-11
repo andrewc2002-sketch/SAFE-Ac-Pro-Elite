@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#071426">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg">
+<title>SAFE AC Pro Elite v4.3.1</title>
+<style>
+:root{--navy:#071426;--blue:#1458d9;--light:#f4f7fb;--line:#d8e0ec;--muted:#667085}
+*{box-sizing:border-box}body{margin:0;background:var(--light);font-family:Arial,sans-serif;color:#111827}
+.app{max-width:1180px;margin:auto;padding:12px 12px 90px}.hero{background:linear-gradient(135deg,#071426,#123d85);color:#fff;border-radius:24px;padding:18px;display:flex;gap:14px;align-items:center}
+.logo{width:62px;height:62px;border-radius:18px;background:#fff1;display:grid;place-items:center;font-weight:900}.hero h1{margin:0}.hero p{margin:5px 0 0;color:#d8e5ff}
+.tabs{display:flex;gap:8px;overflow:auto;padding:12px 0;position:sticky;top:0;background:#f4f7fbe8;backdrop-filter:blur(8px);z-index:10}
+button{border:0;border-radius:13px;padding:11px 14px;background:var(--blue);color:#fff;font-weight:800}button.alt{background:#eef4ff;color:#14315f}button.bad{background:#fee4e2;color:#912018}button.good{background:#067647}
+.card{background:#fff;border:1px solid #e4e7ec;border-radius:18px;padding:15px;margin:12px 0}.section{display:none}.section.active{display:block}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}.layout{display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:14px}
+label{display:block;font-size:12px;font-weight:800;color:#344054;margin:7px 0 4px}input,select,textarea{width:100%;border:1px solid #d0d5dd;border-radius:12px;padding:11px;font-size:16px}
+textarea{min-height:90px}.row{border:1px solid var(--line);border-radius:15px;padding:11px;margin:10px 0}.summary{background:var(--navy);color:#fff}.summary label{color:#e5edff}
+.total{font-size:38px;font-weight:900}.pill{display:flex;justify-content:space-between;background:#eef4ff;color:#102a56;padding:9px;border-radius:11px;margin:8px 0}
+.preview{white-space:pre-wrap;background:#f8fafc;color:#111827;border-radius:12px;padding:10px}.sig{width:100%;height:180px;background:#fff;border:2px dashed #98a2b3;border-radius:12px;touch-action:none}
+.saved{display:flex;justify-content:space-between;gap:10px;border:1px solid var(--line);border-radius:14px;padding:10px;margin:8px 0}.muted{color:var(--muted);font-size:13px}
+.steps{display:grid;grid-template-columns:repeat(9,1fr);gap:6px}.step{padding:9px 5px;border-radius:10px;background:#eef2f6;text-align:center;font-size:11px;font-weight:800}.step.active{background:#1458d9;color:#fff}
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}.photo-card{border:1px solid var(--line);padding:7px;border-radius:12px}.photo-card img{width:100%;height:110px;object-fit:cover;border-radius:9px}
+.term-box{max-height:220px;overflow:auto;background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:10px;font-size:13px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}.kpi{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px}.kpi b{font-size:24px;color:var(--navy)}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.steps{grid-template-columns:repeat(3,1fr)}}
+@media print{.no-print,.tabs,.section:not(.active){display:none!important}body{background:#fff}.app{padding:0}.card,.hero{border-radius:0}.summary{background:#fff!important;color:#111827}.term-box{max-height:none;overflow:visible}}
+</style>
+</head>
+<body>
+<main class="app">
+<section class="hero"><div class="logo">SA</div><div><h1>SAFE AC Pro Elite v4.3.1</h1><p>Field quoting, signatures, photos, customers, work orders and Sales Mode</p></div></section>
+
+<nav class="tabs no-print">
+<button onclick="tab('dashboard')">Dashboard</button>
+<button class="good" onclick="startSalesMode()">Sales Mode</button>
+<button class="alt" onclick="tab('quote')">Quote</button>
+<button class="alt" onclick="tab('customers')">Customers</button>
+<button class="alt" onclick="tab('saved')">Saved Quotes</button>
+<button class="alt" onclick="tab('work')">Work Order</button>
+<button class="alt" onclick="tab('admin')">Pricing</button>
+</nav>
+
+<section id="dashboard" class="section active">
+<div class="card"><h2>Dashboard</h2><div id="stats" class="kpis"></div></div>
+<div class="card"><h2>Recent Quotes</h2><div id="recent"></div></div>
+</section>
+
+<section id="sales" class="section">
+<div class="card no-print"><h2>Sales Mode</h2><div class="steps" id="stepBar"></div></div>
+<div id="salesPane"></div>
+<div class="card no-print"><button class="alt" onclick="salesBack()">Back</button> <button onclick="salesNext()">Next</button> <button class="good" onclick="saveQuote()">Save Quote</button></div>
+</section>
+
+<section id="quote" class="section">
+<div class="card no-print"><button onclick="saveQuote()">Save Quote</button> <button class="alt" onclick="saveSig()">Save Signature</button> <button class="alt" onclick="window.print()">Save PDF</button> <button class="alt" onclick="emailQuote()">Email</button> <button class="bad" onclick="newQuote()">New</button></div>
+
+<div class="card quote-block" data-step="0"><h2>Customer Information</h2><div class="grid">
+<div><label>Quote #</label><input id="quoteNumber"></div><div><label>Quote Date</label><input id="quoteDate" type="date"></div>
+<div><label>Status</label><select id="jobStatus"><option>Estimate</option><option>Sent</option><option>Sold</option><option>Scheduled</option><option>Installed</option><option>Paid</option></select></div>
+<div><label>Client Name</label><input id="clientName"></div><div><label>Phone</label><input id="clientPhone"></div><div><label>Email</label><input id="clientEmail"></div>
+<div><label>Sales Rep</label><input id="salesRep"></div><div style="grid-column:1/-1"><label>Job Address</label><input id="jobAddress"></div>
+</div></div>
+
+<div class="card quote-block" data-step="1"><h2>Job Photos</h2><input id="photoInput" type="file" accept="image/*" capture="environment" multiple onchange="addPhotos(event)"><div id="photos" class="photo-grid"></div></div>
+
+<div class="layout">
+<div>
+<div class="card quote-block" data-step="2"><h2>Measurements</h2><div class="grid"><div><label>Opening Type</label><select id="openingType"><option>Door</option><option>Window</option><option>Fixed Screen</option></select></div><div><label>Width</label><input id="measureWidth" type="number" step=".01"></div><div><label>Height</label><input id="measureHeight" type="number" step=".01"></div><div><label>Measurement Notes</label><input id="measureNotes"></div></div><button class="no-print" onclick="copyMeasurementToProduct()">Use in Product</button></div>
+
+<div class="card quote-block" data-step="3"><h2>Products</h2><div id="items"></div><button class="no-print" onclick="addItem()">+ Add Product</button></div>
+
+<div class="card quote-block" data-step="4"><h2>Job Notes</h2><textarea id="jobNotes"></textarea></div>
+
+<div class="card quote-block" data-step="5"><h2>Financing Estimate</h2><div class="grid"><div><label>APR %</label><input id="apr" type="number" value="9.99" oninput="calcFinance()"></div><div><label>Term (months)</label><select id="term" onchange="calcFinance()"><option>12</option><option>24</option><option selected>36</option><option>48</option><option>60</option></select></div><div><label>Estimated Payment</label><input id="payment" readonly></div></div><p class="muted">Estimate only. Final financing terms depend on lender approval.</p></div>
+
+<div class="card quote-block" data-step="6"><h2>Purchase Terms</h2><div class="term-box">
+<b>SAFE AC LLC – Customer Agreement Summary</b><br><br>
+This summary highlights key terms for customer convenience. The signed agreement controls if there is any conflict.<br><br>
+The customer authorizes SAFE AC LLC to provide the products and services described in the quote or contract. Customers have a three-business-day right to cancel when required by California law. After that period, cancellation requests may be subject to lawful costs and fees.<br><br>
+The customer must provide safe access to the work area, remove obstacles and personal belongings, secure pets, disclose hidden utilities or conditions, and ensure an authorized adult is present during installation and final acceptance.<br><br>
+Installation dates depend on production and crew availability. Customer-requested rescheduling may delay installation. Final payment is due according to the contract. Late or returned payments may be subject to lawful fees.<br><br>
+SAFE AC LLC warrants its workmanship and products according to its written warranty. Coverage may be limited while balances remain unpaid. SAFE AC LLC is not responsible for pre-existing defects or undisclosed hidden conditions.
+</div><label><input id="termsAccepted" type="checkbox" style="width:auto"> Customer accepts the purchase terms</label></div>
+
+<div class="card quote-block" data-step="7"><h2>Customer Approval</h2><div class="grid"><div><label>Printed Name</label><input id="printedName"></div><div><label>Date</label><input id="acceptDate" type="date"></div></div>
+<label>Signature</label><canvas id="sig" class="sig"></canvas><p id="sigStatus" class="muted"></p><button class="no-print" onclick="saveSig()">Save Signature</button> <button class="alt no-print" onclick="clearSig()">Clear</button></div>
+</div>
+
+<aside class="card summary quote-block" data-step="8"><h2>Quote Total</h2><div id="grand" class="total">$0.00</div>
+<div class="grid"><div><label>Discount %</label><input id="discount" type="number" value="0" oninput="calc()"></div><div><label>Sales Tax %</label><input id="tax" type="number" value="0" oninput="calc()"></div><div><label>Deposit Paid</label><input id="deposit" type="number" value="0" oninput="calc()"></div></div>
+<div class="pill">Subtotal <b id="subtotal">$0</b></div><div class="pill">Balance Due <b id="balance">$0</b></div><div id="preview" class="preview">Add products to begin.</div></aside>
+</div>
+</section>
+
+<section id="customers" class="section"><div class="card"><h2>Customers</h2><input id="customerSearch" placeholder="Search customers" oninput="renderCustomers()"><div id="customerList"></div></div></section>
+<section id="saved" class="section"><div class="card"><h2>Saved Quotes</h2><div id="savedList"></div></div></section>
+<section id="work" class="section"><div class="card"><h2>Work Order</h2><button onclick="makeWorkOrder()">Generate</button> <button class="alt" onclick="navigator.clipboard.writeText(makeWorkOrder())">Copy</button><div id="workText" class="preview"></div></div></section>
+<section id="admin" class="section"><div class="card"><h2>Editable Base Pricing</h2><div id="priceEditor" class="grid"></div><button onclick="savePrices()">Save Pricing</button></div></section>
+</main>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],money=n=>'$'+Number(n||0).toLocaleString(undefined,{minimumFractionDigits:2});
+let prices=JSON.parse(localStorage.safeac431_prices||'null')||{'Security Door':2850,'Fire Escape Window':1450,'Fixed Security Screen':975,'Custom Window':1200,'Pet Door Upgrade':350,'Hardware Upgrade':275};
+let signature='',photos=[],salesStep=0,steps=['Customer','Photos','Measurements','Products','Notes','Financing','Terms','Signature','Review'];
+
+function tab(id){$$('.section').forEach(x=>x.classList.remove('active'));$('#'+id).classList.add('active');if(id==='saved'||id==='dashboard')renderSaved();if(id==='customers')renderCustomers();if(id==='admin')renderPrices();scrollTo(0,0)}
+function startSalesMode(){salesStep=0;tab('sales');renderSalesStep()}
+function renderSalesStep(){let bar=$('#stepBar');bar.innerHTML=steps.map((s,i)=>'<div class="step '+(i===salesStep?'active':'')+'">'+(i+1)+'. '+s+'</div>').join('');let src=document.querySelector('.quote-block[data-step="'+salesStep+'"]');$('#salesPane').innerHTML='';if(src){let clone=src.cloneNode(true);clone.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id'));$('#salesPane').append(clone)}}
+function salesNext(){if(salesStep<steps.length-1){salesStep++;renderSalesStep()}else{tab('quote')}}
+function salesBack(){if(salesStep>0){salesStep--;renderSalesStep()}}
+
+function addItem(d={}){let x=document.createElement('div');x.className='row';x.innerHTML='<div class="grid"><div><label>Type</label><select class="type" onchange="this.closest(\\'.row\\').querySelector(\\'.price\\').value=prices[this.value];calc()">'+Object.keys(prices).map(k=>'<option>'+k+'</option>').join('')+'</select></div><div><label>Width</label><input class="width" type="number" step=".01" oninput="calc()"></div><div><label>Height</label><input class="height" type="number" step=".01" oninput="calc()"></div><div><label>Qty</label><input class="qty" type="number" value="1" oninput="calc()"></div><div><label>Unit Price</label><input class="price" type="number" value="'+prices[Object.keys(prices)[0]]+'" oninput="calc()"></div><div><label>Color / Notes</label><input class="notes" oninput="calc()"></div></div><button class="bad no-print" onclick="this.closest(\\'.row\\').remove();calc()">Remove</button>';$('#items').append(x);if(d.type){x.querySelector('.type').value=d.type;x.querySelector('.width').value=d.width;x.querySelector('.height').value=d.height;x.querySelector('.qty').value=d.qty;x.querySelector('.price').value=d.price;x.querySelector('.notes').value=d.notes}calc()}
+function itemData(){return $$('.row').map(r=>({type:r.querySelector('.type').value,width:r.querySelector('.width').value,height:r.querySelector('.height').value,qty:+r.querySelector('.qty').value||1,price:+r.querySelector('.price').value||0,notes:r.querySelector('.notes').value}))}
+function copyMeasurementToProduct(){addItem({type:$('#openingType').value==='Door'?'Security Door':$('#openingType').value==='Fixed Screen'?'Fixed Security Screen':'Fire Escape Window',width:$('#measureWidth').value,height:$('#measureHeight').value,qty:1,price:prices[$('#openingType').value==='Door'?'Security Door':$('#openingType').value==='Fixed Screen'?'Fixed Security Screen':'Fire Escape Window'],notes:$('#measureNotes').value})}
+function calc(){let a=itemData(),sub=a.reduce((s,x)=>s+x.qty*x.price,0),disc=sub*(+$('#discount').value||0)/100,tax=(sub-disc)*(+$('#tax').value||0)/100,g=sub-disc+tax,b=g-(+$('#deposit').value||0);$('#subtotal').textContent=money(sub);$('#grand').textContent=money(g);$('#balance').textContent=money(b);$('#preview').textContent='SAFE AC PRO ELITE QUOTE\\nQuote: '+$('#quoteNumber').value+'\\nCustomer: '+$('#clientName').value+'\\nAddress: '+$('#jobAddress').value+'\\n\\n'+a.map(x=>x.qty+' × '+x.type+' '+x.width+'×'+x.height+' — '+money(x.qty*x.price)+(x.notes?'\\n'+x.notes:'')).join('\\n\\n')+'\\n\\nTOTAL: '+money(g)+'\\nDeposit: '+money($('#deposit').value)+'\\nBalance Due: '+money(b)+'\\n\\nNotes:\\n'+$('#jobNotes').value;calcFinance();return{grand:g,balance:b}}
+function calcFinance(){let p=Number(($('#grand').textContent||'$0').replace(/[$,]/g,''))||0,r=(+$('#apr').value||0)/1200,n=+$('#term').value||36,m=r?p*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1):p/n;$('#payment').value=money(m)+' / month'}
+function saveQuote(){if($('#termsAccepted')&&!$('#termsAccepted').checked){if(!confirm('Purchase terms are not marked accepted. Save anyway?'))return}let q={id:$('#quoteNumber').value,fields:{clientName:$('#clientName').value,clientPhone:$('#clientPhone').value,clientEmail:$('#clientEmail').value,jobAddress:$('#jobAddress').value,jobStatus:$('#jobStatus').value,salesRep:$('#salesRep').value,jobNotes:$('#jobNotes').value,discount:$('#discount').value,tax:$('#tax').value,deposit:$('#deposit').value,printedName:$('#printedName').value,acceptDate:$('#acceptDate').value,termsAccepted:$('#termsAccepted').checked},items:itemData(),signature,photos,totals:calc()},a=JSON.parse(localStorage.safeac431_quotes||'[]'),i=a.findIndex(x=>x.id===q.id);i>=0?a[i]=q:a.unshift(q);localStorage.safeac431_quotes=JSON.stringify(a);saveCustomer(q.fields);alert('Quote saved.');renderSaved()}
+function renderSaved(){let a=JSON.parse(localStorage.safeac431_quotes||'[]'),h=a.length?a.map((q,i)=>'<div class="saved"><div><b>'+q.id+'</b><br>'+q.fields.clientName+' · '+money(q.totals.grand)+'<br><span class="muted">'+q.fields.jobStatus+'</span></div><div><button onclick="loadQuote('+i+')">Load</button> <button class="bad" onclick="deleteQuote('+i+')">Delete</button></div></div>').join(''):'<p class="muted">No saved quotes yet.</p>';$('#savedList').innerHTML=h;$('#recent').innerHTML=h;$('#stats').innerHTML='<div class="kpi"><b>'+a.length+'</b><br>Saved Quotes</div><div class="kpi"><b>'+money(a.reduce((s,q)=>s+q.totals.grand,0))+'</b><br>Pipeline</div><div class="kpi"><b>'+a.filter(q=>['Sold','Scheduled','Installed','Paid'].includes(q.fields.jobStatus)).length+'</b><br>Sold Jobs</div><div class="kpi"><b>'+a.filter(q=>q.fields.jobStatus==='Installed').length+'</b><br>Installed</div>'}
+function loadQuote(i){let q=JSON.parse(localStorage.safeac431_quotes||'[]')[i];$('#quoteNumber').value=q.id;Object.entries(q.fields).forEach(([k,v])=>{let e=$('#'+k);if(e){if(e.type==='checkbox')e.checked=!!v;else e.value=v}});$('#items').innerHTML='';q.items.forEach(addItem);signature=q.signature||'';photos=q.photos||[];renderPhotos();restoreSig();calc();tab('quote')}
+function deleteQuote(i){if(!confirm('Delete this quote?'))return;let a=JSON.parse(localStorage.safeac431_quotes||'[]');a.splice(i,1);localStorage.safeac431_quotes=JSON.stringify(a);renderSaved()}
+function saveCustomer(f){let a=JSON.parse(localStorage.safeac431_customers||'[]'),k=(f.clientEmail||f.clientPhone||f.clientName).toLowerCase(),i=a.findIndex(x=>(x.clientEmail||x.clientPhone||x.clientName).toLowerCase()===k);i>=0?a[i]=f:a.unshift(f);localStorage.safeac431_customers=JSON.stringify(a)}
+function renderCustomers(){let q=($('#customerSearch')?.value||'').toLowerCase(),a=JSON.parse(localStorage.safeac431_customers||'[]').filter(x=>JSON.stringify(x).toLowerCase().includes(q));$('#customerList').innerHTML=a.length?a.map((c,i)=>'<div class="saved"><div><b>'+c.clientName+'</b><br>'+c.clientPhone+' · '+c.clientEmail+'<br><span class="muted">'+c.jobAddress+'</span></div><button onclick="loadCustomer('+i+')">Use</button></div>').join(''):'<p class="muted">No customers yet.</p>'}
+function loadCustomer(i){let c=JSON.parse(localStorage.safeac431_customers||'[]')[i];['clientName','clientPhone','clientEmail','jobAddress','salesRep'].forEach(k=>$('#'+k).value=c[k]||'');tab('quote')}
+function emailQuote(){calc();location.href='mailto:'+encodeURIComponent($('#clientEmail').value)+'?subject='+encodeURIComponent($('#quoteNumber').value+' - SAFE AC Pro Quote')+'&body='+encodeURIComponent($('#preview').textContent)}
+function makeWorkOrder(){let t='SAFE AC WORK ORDER\\nQuote: '+$('#quoteNumber').value+'\\nCustomer: '+$('#clientName').value+'\\nPhone: '+$('#clientPhone').value+'\\nAddress: '+$('#jobAddress').value+'\\n\\n'+itemData().map(x=>x.qty+' × '+x.type+' '+x.width+'×'+x.height+' '+x.notes).join('\\n')+'\\n\\nNOTES\\n'+$('#jobNotes').value;$('#workText').textContent=t;return t}
+function renderPrices(){$('#priceEditor').innerHTML=Object.entries(prices).map(([k,v])=>'<div><label>'+k+'</label><input data-k="'+k+'" type="number" value="'+v+'"></div>').join('')}
+function savePrices(){document.querySelectorAll('[data-k]').forEach(x=>prices[x.dataset.k]=+x.value||0);localStorage.safeac431_prices=JSON.stringify(prices);alert('Pricing saved.');location.reload()}
+function addPhotos(ev){[...ev.target.files].slice(0,12).forEach(f=>{let r=new FileReader();r.onload=()=>{photos.push(r.result);renderPhotos()};r.readAsDataURL(f)})}
+function renderPhotos(){$('#photos').innerHTML=photos.map((p,i)=>'<div class="photo-card"><img src="'+p+'"><button class="bad no-print" onclick="photos.splice('+i+',1);renderPhotos()">Remove</button></div>').join('')}
+function setupSig(){let c=$('#sig'),x=c.getContext('2d'),d=false;c.width=c.offsetWidth*2;c.height=360;x.scale(2,2);x.lineWidth=3;x.lineCap='round';function p(e){let r=c.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}c.onpointerdown=e=>{d=true;let a=p(e);x.beginPath();x.moveTo(a.x,a.y)};c.onpointermove=e=>{if(!d)return;let a=p(e);x.lineTo(a.x,a.y);x.stroke()};c.onpointerup=c.onpointerleave=()=>d=false}
+function saveSig(){signature=$('#sig').toDataURL();$('#sigStatus').textContent='Signature saved for this quote.'}
+function clearSig(){let c=$('#sig');c.getContext('2d').clearRect(0,0,c.width,c.height);signature='';$('#sigStatus').textContent=''}
+function restoreSig(){if(!signature)return;let i=new Image();i.onload=()=>$('#sig').getContext('2d').drawImage(i,0,0,$('#sig').width,$('#sig').height);i.src=signature}
+function newQuote(){if(!confirm('Start a new quote? Save first if needed.'))return;localStorage.removeItem('safeac431_current');location.reload()}
+let d=new Date();$('#quoteNumber').value='SA-'+d.toISOString().slice(0,10).replaceAll('-','')+'-'+String(Date.now()).slice(-4);$('#quoteDate').value=d.toISOString().slice(0,10);$('#acceptDate').value=d.toISOString().slice(0,10);addItem();setupSig();renderSaved();renderCustomers();if('serviceWorker'in navigator)navigator.serviceWorker.register('service-worker.js').catch(()=>{});
+</script>
+</body>
+</html>
