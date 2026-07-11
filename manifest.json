@@ -1,0 +1,17 @@
+{
+  "name": "SAFE AC Pro Elite",
+  "short_name": "SAFE AC Pro",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f4f7fb",
+  "theme_color": "#071426",
+  "description": "Security door, window and fixed-screen quoting app",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
